@@ -1,0 +1,78 @@
+@model BookingViewModel
+@inject SiteCache Cache
+@{
+    var s = await Cache.GetSettingsAsync();
+    var today = AppTime.Today;
+}
+<form class="booking-form @(Model.Compact ? "compact" : "")" method="post" asp-controller="Booking" asp-action="Index"
+      data-booking data-slots-url="@Url.Action("Slots", "Booking")" novalidate>
+    <div asp-validation-summary="ModelOnly" class="alert alert-err"></div>
+
+    <div class="form-grid">
+        <div class="field span-2">
+            <label asp-for="ServiceId"></label>
+            <select asp-for="ServiceId" required>
+                <option value="">— выберите услугу —</option>
+                @foreach (var svc in Model.Services)
+                {
+                    <option value="@svc.Id" selected="@(Model.ServiceId == svc.Id)">@svc.Title — от @svc.PriceFrom.ToString("N0") ₽</option>
+                }
+            </select>
+            <span asp-validation-for="ServiceId" class="field-error"></span>
+        </div>
+
+        <div class="field">
+            <label asp-for="Date"></label>
+            <input asp-for="Date" type="date" required data-date
+                   min="@today.ToString("yyyy-MM-dd")" max="@today.AddDays(s.BookingDaysAhead).ToString("yyyy-MM-dd")"
+                   asp-format="{0:yyyy-MM-dd}" />
+            <span asp-validation-for="Date" class="field-error"></span>
+        </div>
+
+        <div class="field">
+            <label>Время</label>
+            <input type="hidden" asp-for="Time" data-time />
+            <div class="slots" data-slots>
+                <span class="muted small">Сначала выберите дату</span>
+            </div>
+            <span asp-validation-for="Time" class="field-error"></span>
+        </div>
+
+        <div class="field">
+            <label asp-for="Name"></label>
+            <input asp-for="Name" autocomplete="name" required />
+            <span asp-validation-for="Name" class="field-error"></span>
+        </div>
+
+        <div class="field">
+            <label asp-for="Phone"></label>
+            <input asp-for="Phone" type="tel" autocomplete="tel" placeholder="+7 (___) ___-__-__" required />
+            <span asp-validation-for="Phone" class="field-error"></span>
+        </div>
+
+        @if (!Model.Compact)
+        {
+            <div class="field">
+                <label asp-for="Email"></label>
+                <input asp-for="Email" type="email" autocomplete="email" />
+                <span asp-validation-for="Email" class="field-error"></span>
+            </div>
+            <div class="field">
+                <label asp-for="Car"></label>
+                <input asp-for="Car" placeholder="Например: Toyota Camry 2018" />
+                <span asp-validation-for="Car" class="field-error"></span>
+            </div>
+        }
+
+        <div class="field span-2">
+            <label asp-for="Comment"></label>
+            <textarea asp-for="Comment" rows="@(Model.Compact ? 2 : 4)" placeholder="Опишите проблему или пожелания"></textarea>
+            <span asp-validation-for="Comment" class="field-error"></span>
+        </div>
+    </div>
+
+    <div class="form-actions">
+        <button type="submit" class="btn btn-accent">Записаться</button>
+        <span class="muted small">Нажимая кнопку, вы соглашаетесь на обработку персональных данных. Менеджер перезвонит для подтверждения.</span>
+    </div>
+</form>

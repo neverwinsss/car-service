@@ -1,0 +1,52 @@
+@model BookingViewModel
+@inject SiteCache Cache
+@{
+    var s = await Cache.GetSettingsAsync();
+    ViewData["Title"] = "Запись на обслуживание";
+}
+<section class="page-head">
+    <div class="container">
+        <span class="eyebrow">Онлайн-запись</span>
+        <h1>Запись на обслуживание</h1>
+        <p class="lead muted">Выберите услугу, день и свободное время. После отправки менеджер перезвонит и подтвердит запись.</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container booking-wrap booking-wrap-wide">
+        <div class="card">
+            <partial name="_BookingForm" model="Model" />
+        </div>
+        <aside class="booking-aside">
+            <div class="card">
+                <h3>Как это работает</h3>
+                <ol class="steps">
+                    <li>Выберите услугу и удобное время</li>
+                    <li>Менеджер перезвонит для подтверждения</li>
+                    <li>Приезжайте — пост будет свободен</li>
+                </ol>
+            </div>
+            <div class="card">
+                <h3>Режим работы</h3>
+                <p class="muted">@s.WorkHoursText</p>
+                <p class="muted small">Запись открыта на @s.BookingDaysAhead дней вперёд.</p>
+                @if (s.CallButtonEnabled)
+                {
+                    <a class="btn btn-outline btn-block" href="@s.CallPhoneHref">@Icons.Svg("phone", 16) @s.CallButtonText</a>
+                }
+            </div>
+            @if (User.Identity?.IsAuthenticated != true)
+            {
+                <div class="card">
+                    <h3>Есть аккаунт?</h3>
+                    <p class="muted small">Войдите, чтобы видеть историю записей и получать уведомления о статусе.</p>
+                    <a class="link-more" asp-controller="Account" asp-action="Login" asp-route-returnUrl="/Booking">Войти @Icons.Svg("right", 16)</a>
+                </div>
+            }
+        </aside>
+    </div>
+</section>
+
+@section Scripts {
+    <script src="~/js/booking.js" asp-append-version="true" defer></script>
+}

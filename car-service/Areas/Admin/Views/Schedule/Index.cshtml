@@ -1,0 +1,56 @@
+@model SiteSettings
+@{
+    ViewData["Title"] = "Расписание записи";
+    var blocked = (List<BlockedDate>)ViewBag.Blocked;
+    var days = Model.WorkingDays.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()).ToHashSet();
+    string[] names = { "Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс" };
+}
+
+<div class="cards-2 align-start">
+    <form method="post" asp-action="Save" class="card stack">
+        <h2 class="h3">График работы</h2>
+        <div class="form-grid">
+            <div class="field"><label>Начало дня</label><input type="time" name="workStart" value="@Model.WorkStart.ToString("HH:mm")" required /></div>
+            <div class="field"><label>Конец дня</label><input type="time" name="workEnd" value="@Model.WorkEnd.ToString("HH:mm")" required /></div>
+            <div class="field"><label>Шаг записи, мин</label><input type="number" name="slotMinutes" value="@Model.SlotMinutes" min="15" max="240" step="15" required /></div>
+            <div class="field"><label>Постов (машин на слот)</label><input type="number" name="slotCapacity" value="@Model.SlotCapacity" min="1" max="50" required /></div>
+            <div class="field span-2"><label>Запись вперёд, дней</label><input type="number" name="bookingDaysAhead" value="@Model.BookingDaysAhead" min="1" max="180" required /></div>
+        </div>
+        <div class="field">
+            <label>Рабочие дни</label>
+            <div class="day-picker">
+                @for (var i = 1; i <= 7; i++)
+                {
+                    <label><input type="checkbox" name="days" value="@i" checked="@days.Contains(i.ToString())" /><span>@names[i - 1]</span></label>
+                }
+            </div>
+        </div>
+        <div><button class="btn btn-accent" type="submit">Сохранить</button></div>
+    </form>
+
+    <div class="card stack">
+        <h2 class="h3">Нерабочие дни</h2>
+        <p class="muted small">Праздники, санитарные дни — запись на эти даты будет недоступна.</p>
+        <form method="post" asp-action="Block" class="form-grid">
+            <div class="field"><label>Дата</label><input type="date" name="date" min="@AppTime.Today.ToString("yyyy-MM-dd")" required /></div>
+            <div class="field"><label>Причина</label><input name="reason" placeholder="Например: праздник" /></div>
+            <div class="field span-2"><button class="btn btn-outline" type="submit">Закрыть дату</button></div>
+        </form>
+        @if (blocked.Count > 0)
+        {
+            <ul class="plain-list">
+                @foreach (var b in blocked)
+                {
+                    <li class="row-between">
+                        <span><strong>@b.Date.ToString("dd.MM.yyyy, ddd")</strong> <span class="muted">@b.Reason</span></span>
+                        <form method="post" asp-action="Unblock" asp-route-id="@b.Id"><button class="btn btn-sm btn-ghost">Открыть</button></form>
+                    </li>
+                }
+            </ul>
+        }
+        else
+        {
+            <p class="muted">Нерабочих дней не задано.</p>
+        }
+    </div>
+</div>

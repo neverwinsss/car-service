@@ -1,0 +1,74 @@
+@model List<Review>
+@{
+    ViewData["Title"] = "Отзывы";
+    var status = ViewBag.Status as ReviewStatus?;
+    var isAdmin = User.IsInRole(Roles.Admin);
+}
+
+<nav class="tabs">
+    <a class="@(status == null ? "active" : "")" asp-action="Index">Все</a>
+    @foreach (var st in Enum.GetValues<ReviewStatus>())
+    {
+        <a class="@(status == st ? "active" : "")" asp-action="Index" asp-route-status="@st">@Review.StatusTitle(st)</a>
+    }
+</nav>
+
+@if (!isAdmin)
+{
+    <div class="alert alert-info">Режим просмотра. Модерацию отзывов выполняет администратор.</div>
+}
+
+<div class="stack">
+    @foreach (var r in Model)
+    {
+        <div class="card">
+            <div class="row-between">
+                <div>
+                    <strong>@r.AuthorName</strong>
+                    <span class="muted small">· @AppTime.ToLocal(r.CreatedAt).ToString("dd.MM.yyyy HH:mm") · оценка @r.Rating/5</span>
+                </div>
+                <div>
+                    @if (r.IsFeatured) { <span class="badge badge-info">На главной</span> }
+                    <span class="badge @(r.Status == ReviewStatus.Approved ? "badge-ok" : r.Status == ReviewStatus.Rejected ? "badge-bad" : "badge-new")">@Review.StatusTitle(r.Status)</span>
+                </div>
+            </div>
+            <p>@r.Text</p>
+            @if (!string.IsNullOrEmpty(r.AdminReply) && !isAdmin)
+            {
+                <div class="review-reply"><strong>Ответ:</strong> @r.AdminReply</div>
+            }
+            @if (isAdmin)
+            {
+                <div class="actions wrap">
+                    @if (r.Status != ReviewStatus.Approved)
+                    {
+                        <form method="post" asp-action="Moderate" asp-route-id="@r.Id"><input type="hidden" name="status" value="Approved" /><button class="btn btn-sm btn-accent">Опубликовать</button></form>
+                    }
+                    @if (r.Status != ReviewStatus.Rejected)
+                    {
+                        <form method="post" asp-action="Moderate" asp-route-id="@r.Id"><input type="hidden" name="status" value="Rejected" /><button class="btn btn-sm btn-outline">Отклонить</button></form>
+                    }
+                    @if (r.Status == ReviewStatus.Approved)
+                    {
+                        <form method="post" asp-action="Feature" asp-route-id="@r.Id"><button class="btn btn-sm btn-outline">@(r.IsFeatured ? "Убрать с главной" : "На главную")</button></form>
+                    }
+                    <form method="post" asp-action="Delete" asp-route-id="@r.Id" onsubmit="return confirm('Удалить отзыв?')"><button class="btn btn-sm btn-danger">Удалить</button></form>
+                </div>
+                @if (!string.IsNullOrEmpty(r.AdminReply))
+                {
+                    <div class="review-reply">
+                        <strong>Ваш ответ:</strong> @r.AdminReply
+                        <div class="small @(r.Status == ReviewStatus.Approved ? "muted" : "accent-text")">
+                            @(r.Status == ReviewStatus.Approved ? "Виден всем посетителям на сайте." : "Не виден на сайте, пока отзыв не опубликован.")
+                        </div>
+                    </div>
+                }
+                <form method="post" asp-action="Reply" asp-route-id="@r.Id" class="reply-form">
+                    <input name="reply" value="@r.AdminReply" placeholder="Ответ сервиса (показывается под опубликованным отзывом)" maxlength="1000" />
+                    <button class="btn btn-sm btn-outline" type="submit">@(string.IsNullOrEmpty(r.AdminReply) ? "Ответить" : "Изменить ответ")</button>
+                </form>
+            }
+        </div>
+    }
+    @if (Model.Count == 0) { <p class="muted">Отзывов нет.</p> }
+</div>

@@ -1,0 +1,25 @@
+@model List<Appointment>
+@{ ViewData["Title"] = "Сводка"; }
+
+<div class="admin-stats">
+    <a class="card stat-card" asp-controller="Appointments" asp-action="Index" asp-route-status="New" asp-route-period="all">
+        <div class="stat-num">@ViewBag.NewAppointments</div><div class="muted">новых заявок</div>
+    </a>
+    <a class="card stat-card" asp-controller="Appointments" asp-action="Index" asp-route-date="@AppTime.Today.ToString("yyyy-MM-dd")">
+        <div class="stat-num">@ViewBag.TodayAppointments</div><div class="muted">записей на сегодня</div>
+    </a>
+    <a class="card stat-card" asp-controller="Reviews" asp-action="Index" asp-route-status="Pending">
+        <div class="stat-num">@ViewBag.PendingReviews</div><div class="muted">отзывов на модерации</div>
+    </a>
+    <a class="card stat-card" asp-controller="Feedback" asp-action="Index">
+        <div class="stat-num">@ViewBag.NewFeedback</div><div class="muted">необработанных сообщений</div>
+    </a>
+</div>
+
+<div class="card">
+    <div class="row-between mb-1">
+        <h2 class="h3">Ближайшие записи</h2>
+        <a class="link-more" asp-controller="Appointments" asp-action="Index">Все заявки @Icons.Svg("right", 16)</a>
+    </div>
+    <partial name="_AppointmentsTable" model="Model" />
+</div>

@@ -1,0 +1,61 @@
+@model List<Appointment>
+@{
+    ViewData["Title"] = "Заявки на обслуживание";
+    var status = ViewBag.Status as AppointmentStatus?;
+    var date = ViewBag.Date as DateOnly?;
+    var period = ViewBag.Period as string ?? "";
+    var slots = ViewBag.Slots as List<TimeSlot>;
+}
+
+<form method="get" class="card filters">
+    <div class="field">
+        <label>Период</label>
+        <select name="period">
+            <option value="upcoming" selected="@(period == "upcoming")">Предстоящие</option>
+            <option value="past" selected="@(period == "past")">Прошедшие</option>
+            <option value="all" selected="@(period == "all")">Все</option>
+        </select>
+    </div>
+    <div class="field">
+        <label>Конкретный день</label>
+        <input type="date" name="date" value="@date?.ToString("yyyy-MM-dd")" />
+    </div>
+    <div class="field">
+        <label>Статус</label>
+        <select name="status">
+            <option value="">Любой</option>
+            @foreach (var st in Enum.GetValues<AppointmentStatus>())
+            {
+                <option value="@st" selected="@(status == st)">@Appointment.StatusTitle(st)</option>
+            }
+        </select>
+    </div>
+    <div class="field">
+        <label>Поиск</label>
+        <input name="q" value="@ViewBag.Q" placeholder="Имя, телефон, авто" />
+    </div>
+    <div class="field field-btns">
+        <button class="btn btn-accent" type="submit">Показать</button>
+        <a class="btn btn-ghost" asp-action="Index">Сброс</a>
+    </div>
+</form>
+
+@if (date != null && slots != null)
+{
+    <div class="card mb-1">
+        <h2 class="h3">Загрузка на @date.Value.ToString("dd MMMM yyyy, dddd")</h2>
+        <div class="slot-grid">
+            @foreach (var sl in slots)
+            {
+                <div class="slot-cell @(sl.Free == 0 ? "full" : sl.Booked > 0 ? "partial" : "")">
+                    <strong>@sl.Time.ToString("HH:mm")</strong>
+                    <span class="small">@sl.Booked / @sl.Capacity</span>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+<div class="card">
+    <partial name="_AppointmentsTable" model="Model" />
+</div>

@@ -1,0 +1,35 @@
+@model List<ServiceItem>
+@{ ViewData["Title"] = "Услуги"; }
+<section class="page-head">
+    <div class="container">
+        <span class="eyebrow">Услуги</span>
+        <h1>Услуги и цены</h1>
+        <p class="lead muted">Окончательная стоимость зависит от модели автомобиля и объёма работ — мастер согласует её с вами до начала ремонта.</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container service-list">
+        @foreach (var svc in Model)
+        {
+            <article class="card service-row" id="service-@svc.Id">
+                <div class="service-icon">@Icons.Svg(svc.Icon, 26)</div>
+                <div class="service-body">
+                    <h2 class="h3">@svc.Title</h2>
+                    <p class="muted">@(svc.Description ?? svc.ShortDescription)</p>
+                    <div class="service-meta">
+                        <span>@Icons.Svg("clock", 16) от @(svc.DurationMinutes >= 60 ? $"{svc.DurationMinutes / 60.0:0.#} ч" : $"{svc.DurationMinutes} мин")</span>
+                    </div>
+                </div>
+                <div class="service-side">
+                    <div class="price">от @svc.PriceFrom.ToString("N0") ₽</div>
+                    <a class="btn btn-accent btn-sm" asp-controller="Booking" asp-action="Index" asp-route-serviceId="@svc.Id">Записаться</a>
+                </div>
+            </article>
+        }
+        @if (Model.Count == 0)
+        {
+            <p class="muted">Список услуг пока пуст.</p>
+        }
+    </div>
+</section>

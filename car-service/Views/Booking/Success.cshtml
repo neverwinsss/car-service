@@ -1,0 +1,28 @@
+@model Appointment
+@{ ViewData["Title"] = "Заявка принята"; }
+<section class="container page narrow center">
+    <div class="success-mark">@Icons.Svg("check", 36)</div>
+    <h1>Заявка принята</h1>
+    <p class="lead muted">Мы ждём вас <strong>@Model.Date.ToString("d MMMM (dddd)")</strong> в <strong>@Model.Time.ToString("HH:mm")</strong>.</p>
+    <div class="card text-left">
+        <dl class="dl">
+            <dt>Номер заявки</dt><dd>№ @Model.Id</dd>
+            <dt>Услуга</dt><dd>@Model.Service?.Title</dd>
+            <dt>Клиент</dt><dd>@Model.ClientName, @Model.ClientPhone</dd>
+            @if (!string.IsNullOrEmpty(Model.Car)) { <dt>Автомобиль</dt><dd>@Model.Car</dd> }
+            <dt>Статус</dt><dd><span class="badge @Appointment.StatusCss(Model.Status)">@Appointment.StatusTitle(Model.Status)</span></dd>
+        </dl>
+    </div>
+    <p class="muted">Менеджер перезвонит для подтверждения в рабочее время.</p>
+    <div class="hero-actions center">
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <a class="btn btn-accent" asp-controller="Account" asp-action="Index">Мои записи</a>
+        }
+        else
+        {
+            <a class="btn btn-accent" asp-controller="Account" asp-action="Register">Создать личный кабинет</a>
+        }
+        <a class="btn btn-outline" asp-controller="Home" asp-action="Index">На главную</a>
+    </div>
+</section>

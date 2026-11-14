@@ -1,0 +1,64 @@
+@inject SiteCache Cache
+@{
+    var s = await Cache.GetSettingsAsync();
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    string Active(string c) => string.Equals(controller, c, StringComparison.OrdinalIgnoreCase) ? "active" : "";
+    var isAdmin = User.IsInRole(Roles.Admin);
+}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>@ViewData["Title"] — Админ-панель @s.CompanyName</title>
+    <link rel="icon" href="~/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="admin">
+    <div class="admin-shell">
+        <aside class="admin-side" data-nav>
+            <a class="logo" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                <span class="logo-mark">@Icons.Svg("wrench", 18)</span>
+                <span class="logo-text">@s.CompanyName</span>
+            </a>
+            <div class="admin-role">@(isAdmin ? "Администратор" : "Менеджер")</div>
+            <nav class="admin-nav">
+                <a class="@Active("Dashboard")" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">@Icons.Svg("grid", 18) Сводка</a>
+                <a class="@Active("Appointments")" asp-area="Admin" asp-controller="Appointments" asp-action="Index">@Icons.Svg("calendar", 18) Заявки</a>
+                <a class="@Active("Reviews")" asp-area="Admin" asp-controller="Reviews" asp-action="Index">@Icons.Svg("star", 18) Отзывы</a>
+                <a class="@Active("Feedback")" asp-area="Admin" asp-controller="Feedback" asp-action="Index">@Icons.Svg("chat", 18) Обратная связь</a>
+                @if (isAdmin)
+                {
+                    <div class="admin-nav-group">Контент</div>
+                    <a class="@Active("Services")" asp-area="Admin" asp-controller="Services" asp-action="Index">@Icons.Svg("wrench", 18) Услуги</a>
+                    <a class="@Active("Slides")" asp-area="Admin" asp-controller="Slides" asp-action="Index">@Icons.Svg("image", 18) Баннер</a>
+                    <a class="@Active("Team")" asp-area="Admin" asp-controller="Team" asp-action="Index">@Icons.Svg("users", 18) Сотрудники</a>
+                    <div class="admin-nav-group">Система</div>
+                    <a class="@Active("Schedule")" asp-area="Admin" asp-controller="Schedule" asp-action="Index">@Icons.Svg("clock", 18) Расписание</a>
+                    <a class="@Active("Users")" asp-area="Admin" asp-controller="Users" asp-action="Index">@Icons.Svg("user", 18) Пользователи</a>
+                    <a class="@Active("Settings")" asp-area="Admin" asp-controller="Settings" asp-action="Index">@Icons.Svg("settings", 18) Контакты и настройки</a>
+                }
+            </nav>
+            <div class="admin-side-foot">
+                <a asp-area="" asp-controller="Home" asp-action="Index">@Icons.Svg("home", 16) На сайт</a>
+                <form method="post" asp-area="" asp-controller="Account" asp-action="Logout">
+                    <button type="submit" class="linklike">@Icons.Svg("logout", 16) Выйти (@User.Identity?.Name)</button>
+                </form>
+            </div>
+        </aside>
+
+        <div class="admin-main">
+            <div class="admin-top">
+                <button class="nav-toggle" type="button" aria-label="Меню" data-nav-toggle>@Icons.Svg("menu", 22)</button>
+                <h1 class="h2">@ViewData["Title"]</h1>
+                @RenderSection("Actions", required: false)
+            </div>
+            <partial name="_Flash" />
+            @RenderBody()
+        </div>
+    </div>
+    <script src="~/js/site.js" asp-append-version="true" defer></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

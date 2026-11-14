@@ -1,0 +1,30 @@
+@model List<FeedbackMessage>
+@{ ViewData["Title"] = "Обратная связь"; }
+
+<div class="stack">
+    @foreach (var f in Model)
+    {
+        <div class="card @(f.IsProcessed ? "dim" : "")">
+            <div class="row-between">
+                <div>
+                    <strong>@f.Name</strong> <span class="muted">· @f.Contact</span>
+                    <div class="muted small">@AppTime.ToLocal(f.CreatedAt).ToString("dd.MM.yyyy HH:mm")</div>
+                </div>
+                <span class="badge @(f.IsProcessed ? "badge-done" : "badge-new")">@(f.IsProcessed ? "Обработано" : "Новое")</span>
+            </div>
+            <p>@f.Message</p>
+            <div class="actions">
+                <form method="post" asp-action="Toggle" asp-route-id="@f.Id">
+                    <button class="btn btn-sm @(f.IsProcessed ? "btn-ghost" : "btn-accent")" type="submit">@(f.IsProcessed ? "Вернуть в новые" : "Отметить обработанным")</button>
+                </form>
+                @if (User.IsInRole(Roles.Admin))
+                {
+                    <form method="post" asp-action="Delete" asp-route-id="@f.Id" onsubmit="return confirm('Удалить сообщение?')">
+                        <button class="btn btn-sm btn-danger" type="submit">Удалить</button>
+                    </form>
+                }
+            </div>
+        </div>
+    }
+    @if (Model.Count == 0) { <p class="muted">Сообщений нет.</p> }
+</div>

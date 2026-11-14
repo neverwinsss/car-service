@@ -1,0 +1,76 @@
+@model List<TeamMember>
+@inject SiteCache Cache
+@{
+    var s = await Cache.GetSettingsAsync();
+    ViewData["Title"] = "О сервисе";
+}
+<section class="page-head">
+    <div class="container">
+        <span class="eyebrow">О сервисе</span>
+        <h1>@s.CompanyName — автосервис полного цикла</h1>
+        <p class="lead muted">@s.Slogan</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container about-grid">
+        <div class="prose">
+            @foreach (var p in (s.AboutFull ?? "").Split('\n', StringSplitOptions.RemoveEmptyEntries))
+            {
+                <p>@p</p>
+            }
+        </div>
+        <div class="stats stats-col">
+            <div class="stat"><div class="stat-num">@s.YearsOnMarket+</div><div class="muted">лет на рынке</div></div>
+            <div class="stat"><div class="stat-num">@s.CarsServiced.ToString("N0")</div><div class="muted">автомобилей обслужено</div></div>
+            <div class="stat"><div class="stat-num">@s.WarrantyMonths мес.</div><div class="muted">гарантия на работы</div></div>
+        </div>
+    </div>
+</section>
+
+<section class="section section-alt">
+    <div class="container">
+        <span class="eyebrow">Преимущества</span>
+        <h2>Почему выбирают нас</h2>
+        <div class="cards-3">
+            <div class="card">@Icons.Svg("award", 26, "accent")<h3>Квалификация</h3><p class="muted">Мастера с профильным образованием, регулярное обучение и сертификация у поставщиков оборудования и запчастей.</p></div>
+            <div class="card">@Icons.Svg("diag", 26, "accent")<h3>Оборудование</h3><p class="muted">Дилерские сканеры, стенд развала-схождения 3D, станция заправки кондиционеров, покрасочная камера.</p></div>
+            <div class="card">@Icons.Svg("shield", 26, "accent")<h3>Гарантия</h3><p class="muted">@s.WarrantyMonths месяцев на работы, гарантия производителя на запчасти. Все условия — в заказ-наряде.</p></div>
+            <div class="card">@Icons.Svg("check", 26, "accent")<h3>Честная смета</h3><p class="muted">Сначала диагностика и согласование, потом ремонт. Ни одной работы без вашего согласия.</p></div>
+            <div class="card">@Icons.Svg("clock", 26, "accent")<h3>Без очередей</h3><p class="muted">Онлайн-запись на конкретное время, @s.SlotCapacity рабочих поста, большинство работ — в день обращения.</p></div>
+            <div class="card">@Icons.Svg("car", 26, "accent")<h3>История авто</h3><p class="muted">Электронная история обслуживания каждого автомобиля доступна в личном кабинете.</p></div>
+        </div>
+    </div>
+</section>
+
+@if (Model.Count > 0)
+{
+    <section class="section">
+        <div class="container">
+            <span class="eyebrow">Команда</span>
+            <h2>Наши специалисты</h2>
+            <div class="cards-4">
+                @foreach (var m in Model)
+                {
+                    <div class="card team-card">
+                        <div class="avatar avatar-lg">@m.Name[..1]</div>
+                        <h3>@m.Name</h3>
+                        <div class="accent-text small">@m.Position</div>
+                        <p class="muted small">@m.Description</p>
+                        <div class="muted small">Стаж: @m.Experience лет</div>
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+}
+
+<section class="section section-alt">
+    <div class="container cta">
+        <div>
+            <h2>Готовы записаться?</h2>
+            <p class="muted">Выберите удобные дату и время — займёт меньше минуты.</p>
+        </div>
+        <a class="btn btn-accent" asp-controller="Booking" asp-action="Index">Записаться на обслуживание</a>
+    </div>
+</section>

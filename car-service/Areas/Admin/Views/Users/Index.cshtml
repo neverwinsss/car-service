@@ -1,0 +1,103 @@
+@model List<User>
+@{
+    ViewData["Title"] = "Пользователи и роли";
+    var counts = (Dictionary<int, int>)ViewBag.Counts;
+    var me = User.GetUserId();
+}
+
+<form method="get" class="card filters">
+    <div class="field">
+        <label>Поиск</label>
+        <input name="q" value="@ViewBag.Q" placeholder="Имя, e-mail, телефон" />
+    </div>
+    <div class="field">
+        <label>Роль</label>
+        <select name="role">
+            <option value="">Все</option>
+            @foreach (var r in Roles.All)
+            {
+                <option value="@r" selected="@(ViewBag.Role == r)">@Roles.Title(r)</option>
+            }
+        </select>
+    </div>
+    <div class="field field-btns">
+        <button class="btn btn-accent" type="submit">Найти</button>
+        <a class="btn btn-ghost" asp-action="Index">Сброс</a>
+    </div>
+</form>
+
+<div class="card">
+    <div class="table-wrap">
+        <table class="table">
+            <thead><tr><th>Пользователь</th><th>Телефон</th><th>Записей</th><th>Роль</th><th class="right">Действия</th></tr></thead>
+            <tbody>
+                @foreach (var u in Model)
+                {
+                    <tr class="@(u.IsBlocked ? "dim" : "")">
+                        <td data-label="Пользователь">
+                            <strong>@u.FullName</strong> @if (u.IsBlocked) { <span class="badge badge-bad">Заблокирован</span> }
+                            <div class="muted small">@u.Email · с @AppTime.ToLocal(u.CreatedAt).ToString("dd.MM.yyyy")</div>
+                        </td>
+                        <td data-label="Телефон">@(u.Phone ?? "—")</td>
+                        <td data-label="Записей">@counts.GetValueOrDefault(u.Id)</td>
+                        <td data-label="Роль">
+                            @if (u.Id == me)
+                            {
+                                <span class="badge badge-info">@Roles.Title(u.Role) (вы)</span>
+                            }
+                            else
+                            {
+                                <form method="post" asp-action="SetRole" asp-route-id="@u.Id" class="inline-form">
+                                    <select name="role" onchange="this.form.submit()" aria-label="Роль">
+                                        @foreach (var r in Roles.All)
+                                        {
+                                            <option value="@r" selected="@(u.Role == r)">@Roles.Title(r)</option>
+                                        }
+                                    </select>
+                                    <noscript><button class="btn btn-sm">OK</button></noscript>
+                                </form>
+                            }
+                        </td>
+                        <td class="right actions">
+                            @if (u.Id != me)
+                            {
+                                <details class="dropdown">
+                                    <summary class="btn btn-sm btn-ghost">Ещё</summary>
+                                    <div class="dropdown-body stack">
+                                        <form method="post" asp-action="ToggleBlock" asp-route-id="@u.Id">
+                                            <button class="btn btn-sm btn-outline btn-block">@(u.IsBlocked ? "Разблокировать" : "Заблокировать")</button>
+                                        </form>
+                                        <form method="post" asp-action="ResetPassword" asp-route-id="@u.Id" class="stack">
+                                            <input name="newPassword" type="text" placeholder="Новый пароль" minlength="6" required autocomplete="off" />
+                                            <button class="btn btn-sm btn-outline btn-block">Сменить пароль</button>
+                                        </form>
+                                        <form method="post" asp-action="Delete" asp-route-id="@u.Id" onsubmit="return confirm('Удалить пользователя? Его записи сохранятся без привязки к аккаунту.')">
+                                            <button class="btn btn-sm btn-danger btn-block">Удалить</button>
+                                        </form>
+                                    </div>
+                                </details>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<details class="card mt-2">
+    <summary><strong>+ Создать пользователя (например, нового менеджера)</strong></summary>
+    <form method="post" asp-action="Create" class="form-grid mt-1">
+        <div class="field"><label>Имя</label><input name="fullName" required /></div>
+        <div class="field"><label>E-mail</label><input name="email" type="email" required /></div>
+        <div class="field"><label>Телефон</label><input name="phone" type="tel" /></div>
+        <div class="field"><label>Пароль</label><input name="password" type="text" minlength="6" required autocomplete="off" /></div>
+        <div class="field">
+            <label>Роль</label>
+            <select name="role">
+                @foreach (var r in Roles.All) { <option value="@r" selected="@(r == Roles.Manager)">@Roles.Title(r)</option> }
+            </select>
+        </div>
+        <div class="field field-btns"><button class="btn btn-accent" type="submit">Создать</button></div>
+    </form>
+</details>

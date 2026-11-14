@@ -1,0 +1,12 @@
+@inject SiteCache Cache
+@{ var s = await Cache.GetSettingsAsync(); }
+<div class="map">
+    @if (!string.IsNullOrEmpty(s.MapEmbedUrl))
+    {
+        <iframe src="@s.MapEmbedUrl" title="Карта проезда" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>
+    }
+    else
+    {
+        <div class="map-empty muted">@Icons.Svg("map", 32)<span>@s.Address</span></div>
+    }
+</div>

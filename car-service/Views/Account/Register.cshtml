@@ -1,0 +1,38 @@
+@model RegisterViewModel
+@{ ViewData["Title"] = "Регистрация"; }
+<section class="container page auth">
+    <div class="card auth-card">
+        <h1 class="h2">Регистрация</h1>
+        <p class="muted">Личный кабинет — это история записей, уведомления о статусе и возможность оставить отзыв.</p>
+        <form method="post" class="stack">
+            <div asp-validation-summary="ModelOnly" class="alert alert-err"></div>
+            <div class="field">
+                <label asp-for="FullName"></label>
+                <input asp-for="FullName" autocomplete="name" required />
+                <span asp-validation-for="FullName" class="field-error"></span>
+            </div>
+            <div class="field">
+                <label asp-for="Email"></label>
+                <input asp-for="Email" type="email" autocomplete="email" required />
+                <span asp-validation-for="Email" class="field-error"></span>
+            </div>
+            <div class="field">
+                <label asp-for="Phone"></label>
+                <input asp-for="Phone" type="tel" autocomplete="tel" placeholder="+7 (___) ___-__-__" />
+                <span asp-validation-for="Phone" class="field-error"></span>
+            </div>
+            <div class="field">
+                <label asp-for="Password"></label>
+                <input asp-for="Password" autocomplete="new-password" required minlength="6" />
+                <span asp-validation-for="Password" class="field-error"></span>
+            </div>
+            <div class="field">
+                <label asp-for="ConfirmPassword"></label>
+                <input asp-for="ConfirmPassword" autocomplete="new-password" required />
+                <span asp-validation-for="ConfirmPassword" class="field-error"></span>
+            </div>
+            <button type="submit" class="btn btn-accent btn-block">Зарегистрироваться</button>
+        </form>
+        <p class="muted center mt-2">Уже есть аккаунт? <a asp-action="Login">Войти</a></p>
+    </div>
+</section>

@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>car_service</RootNamespace>
+    <!-- Для IIS-хостинга (MonsterASP): приложение работает внутри процесса IIS -->
+    <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.14" />
+  </ItemGroup>
+
+  <!-- Локальная база и ключи не публикуются на хостинг: там создаётся своя БД при первом запуске -->
+  <ItemGroup>
+    <Content Remove="App_Data\**" />
+    <None Remove="App_Data\**" />
+  </ItemGroup>
+
+</Project>

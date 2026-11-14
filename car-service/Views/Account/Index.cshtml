@@ -1,0 +1,159 @@
+@model CabinetViewModel
+@{
+    ViewData["Title"] = "Личный кабинет";
+    var unread = Model.Notifications.Count(n => !n.IsRead);
+    string Tab(string t) => Model.Tab == t ? "active" : "";
+    var today = AppTime.Today;
+}
+<section class="page-head">
+    <div class="container cabinet-head">
+        <div>
+            <span class="eyebrow">Личный кабинет</span>
+            <h1>@Model.User.FullName</h1>
+            <p class="muted">@Model.User.Email · @Roles.Title(Model.User.Role)</p>
+        </div>
+        <div class="hero-actions">
+            <a class="btn btn-accent" asp-controller="Booking" asp-action="Index">Новая запись</a>
+            <form method="post" asp-action="Logout"><button class="btn btn-outline" type="submit">@Icons.Svg("logout", 16) Выйти</button></form>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <nav class="tabs">
+            <a class="@Tab("appointments")" asp-action="Index" asp-route-tab="appointments">История записей</a>
+            <a class="@Tab("notifications")" asp-action="Index" asp-route-tab="notifications">Уведомления @if (unread > 0) { <span class="count">@unread</span> }</a>
+            <a class="@Tab("reviews")" asp-action="Index" asp-route-tab="reviews">Мои отзывы</a>
+            <a class="@Tab("profile")" asp-action="Index" asp-route-tab="profile">Профиль</a>
+        </nav>
+
+        @if (Model.Tab == "appointments")
+        {
+            @if (Model.Appointments.Count == 0)
+            {
+                <div class="card empty">
+                    <p class="muted">У вас пока нет записей.</p>
+                    <a class="btn btn-accent" asp-controller="Booking" asp-action="Index">Записаться на обслуживание</a>
+                </div>
+            }
+            else
+            {
+                <div class="table-wrap">
+                    <table class="table">
+                        <thead><tr><th>№</th><th>Дата и время</th><th>Услуга</th><th>Автомобиль</th><th>Статус</th><th></th></tr></thead>
+                        <tbody>
+                            @foreach (var a in Model.Appointments)
+                            {
+                                <tr>
+                                    <td data-label="№">@a.Id</td>
+                                    <td data-label="Дата">@a.Date.ToString("dd.MM.yyyy") в @a.Time.ToString("HH:mm")</td>
+                                    <td data-label="Услуга">@a.Service?.Title</td>
+                                    <td data-label="Авто">@(a.Car ?? "—")</td>
+                                    <td data-label="Статус"><span class="badge @Appointment.StatusCss(a.Status)">@Appointment.StatusTitle(a.Status)</span></td>
+                                    <td class="right">
+                                        @if ((a.Status == AppointmentStatus.New || a.Status == AppointmentStatus.Confirmed) && a.Date >= today)
+                                        {
+                                            <form method="post" asp-action="CancelAppointment" asp-route-id="@a.Id" onsubmit="return confirm('Отменить запись?')">
+                                                <button class="btn btn-sm btn-outline" type="submit">Отменить</button>
+                                            </form>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        }
+        else if (Model.Tab == "notifications")
+        {
+            @if (unread > 0)
+            {
+                <form method="post" asp-action="ReadNotifications" class="mb-1"><button class="btn btn-sm btn-outline" type="submit">Отметить все как прочитанные</button></form>
+            }
+            <div class="stack">
+                @foreach (var n in Model.Notifications)
+                {
+                    <div class="card notice @(n.IsRead ? "" : "unread")">
+                        @Icons.Svg("bell", 18)
+                        <div>
+                            <div>@n.Text</div>
+                            <div class="muted small">@AppTime.ToLocal(n.CreatedAt).ToString("dd.MM.yyyy HH:mm")</div>
+                        </div>
+                    </div>
+                }
+                @if (Model.Notifications.Count == 0) { <p class="muted">Уведомлений нет.</p> }
+            </div>
+        }
+        else if (Model.Tab == "reviews")
+        {
+            <div class="stack">
+                @foreach (var r in Model.Reviews)
+                {
+                    <div class="card">
+                        <div class="row-between">
+                            <span class="badge @(r.Status == ReviewStatus.Approved ? "badge-ok" : r.Status == ReviewStatus.Rejected ? "badge-bad" : "badge-new")">@Review.StatusTitle(r.Status)</span>
+                            <span class="muted small">@AppTime.ToLocal(r.CreatedAt).ToString("dd.MM.yyyy") · оценка @r.Rating/5</span>
+                        </div>
+                        <p>@r.Text</p>
+                        @if (!string.IsNullOrEmpty(r.AdminReply))
+                        {
+                            <div class="review-reply"><strong>Ответ сервиса:</strong> @r.AdminReply</div>
+                        }
+                    </div>
+                }
+                @if (Model.Reviews.Count == 0) { <p class="muted">Вы ещё не оставляли отзывов.</p> }
+                <a class="link-more" asp-controller="Reviews" asp-action="Index" asp-fragment="add">Оставить отзыв @Icons.Svg("right", 16)</a>
+            </div>
+        }
+        else
+        {
+            <div class="cards-2">
+                <form method="post" asp-action="Profile" class="card stack">
+                    <h3>Профиль</h3>
+                    <div class="field">
+                        <label asp-for="Profile.FullName"></label>
+                        <input asp-for="Profile.FullName" required />
+                        <span asp-validation-for="Profile.FullName" class="field-error"></span>
+                    </div>
+                    <div class="field">
+                        <label asp-for="Profile.Phone"></label>
+                        <input asp-for="Profile.Phone" type="tel" />
+                        <span asp-validation-for="Profile.Phone" class="field-error"></span>
+                    </div>
+                    <div class="field">
+                        <label asp-for="Profile.Car"></label>
+                        <input asp-for="Profile.Car" placeholder="Марка, модель, год" />
+                        <span asp-validation-for="Profile.Car" class="field-error"></span>
+                    </div>
+                    <div class="field">
+                        <label>E-mail</label>
+                        <input value="@Model.User.Email" disabled />
+                    </div>
+                    <button class="btn btn-accent" type="submit">Сохранить</button>
+                </form>
+
+                <form method="post" asp-action="ChangePassword" class="card stack">
+                    <h3>Смена пароля</h3>
+                    <div class="field">
+                        <label asp-for="Password.CurrentPassword"></label>
+                        <input asp-for="Password.CurrentPassword" autocomplete="current-password" required />
+                        <span asp-validation-for="Password.CurrentPassword" class="field-error"></span>
+                    </div>
+                    <div class="field">
+                        <label asp-for="Password.NewPassword"></label>
+                        <input asp-for="Password.NewPassword" autocomplete="new-password" required minlength="6" />
+                        <span asp-validation-for="Password.NewPassword" class="field-error"></span>
+                    </div>
+                    <div class="field">
+                        <label asp-for="Password.ConfirmPassword"></label>
+                        <input asp-for="Password.ConfirmPassword" autocomplete="new-password" required />
+                        <span asp-validation-for="Password.ConfirmPassword" class="field-error"></span>
+                    </div>
+                    <button class="btn btn-outline" type="submit">Изменить пароль</button>
+                </form>
+            </div>
+        }
+    </div>
+</section>

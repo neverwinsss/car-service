@@ -1,0 +1,52 @@
+@model ServiceItem
+@{ ViewData["Title"] = Model.Id == 0 ? "Новая услуга" : "Редактирование услуги"; }
+
+<form method="post" class="card stack narrow-form">
+    <input type="hidden" asp-for="Id" />
+    <div asp-validation-summary="ModelOnly" class="alert alert-err"></div>
+    <div class="field">
+        <label asp-for="Title"></label>
+        <input asp-for="Title" required />
+        <span asp-validation-for="Title" class="field-error"></span>
+    </div>
+    <div class="field">
+        <label asp-for="ShortDescription"></label>
+        <input asp-for="ShortDescription" required />
+        <span asp-validation-for="ShortDescription" class="field-error"></span>
+    </div>
+    <div class="field">
+        <label asp-for="Description"></label>
+        <textarea asp-for="Description" rows="5"></textarea>
+    </div>
+    <div class="form-grid">
+        <div class="field">
+            <label asp-for="PriceFrom"></label>
+            <input asp-for="PriceFrom" type="number" min="0" step="1" />
+            <span asp-validation-for="PriceFrom" class="field-error"></span>
+        </div>
+        <div class="field">
+            <label asp-for="DurationMinutes"></label>
+            <input asp-for="DurationMinutes" type="number" min="10" step="5" />
+            <span asp-validation-for="DurationMinutes" class="field-error"></span>
+        </div>
+        <div class="field">
+            <label asp-for="SortOrder"></label>
+            <input asp-for="SortOrder" type="number" />
+        </div>
+        <div class="field">
+            <label asp-for="Icon"></label>
+            <div class="icon-picker">
+                @foreach (var ic in ServiceItem.Icons)
+                {
+                    <label title="@ic"><input type="radio" name="Icon" value="@ic" checked="@(Model.Icon == ic)" />@Icons.Svg(ic, 20)</label>
+                }
+            </div>
+        </div>
+    </div>
+    <label class="check"><input asp-for="IsActive" /> Показывать на сайте</label>
+    <label class="check"><input asp-for="IsFeatured" /> Показывать на главной</label>
+    <div class="row-between">
+        <button class="btn btn-accent" type="submit">Сохранить</button>
+        <a class="btn btn-ghost" asp-action="Index">Отмена</a>
+    </div>
+</form>

@@ -1,0 +1,21 @@
+@model Review
+<article class="card review">
+    <div class="review-head">
+        <div class="avatar">@(Model.AuthorName.Length > 0 ? Model.AuthorName[..1].ToUpper() : "?")</div>
+        <div>
+            <div class="review-author">@Model.AuthorName</div>
+            <div class="muted small">@AppTime.ToLocal(Model.CreatedAt).ToString("d MMMM yyyy")</div>
+        </div>
+        <div class="stars" aria-label="Оценка @Model.Rating из 5">
+            @for (var i = 1; i <= 5; i++)
+            {
+                <span class="@(i <= Model.Rating ? "on" : "")">@Icons.Svg("star", 14)</span>
+            }
+        </div>
+    </div>
+    <p>@Model.Text</p>
+    @if (!string.IsNullOrEmpty(Model.AdminReply))
+    {
+        <div class="review-reply"><strong>Ответ сервиса:</strong> @Model.AdminReply</div>
+    }
+</article>

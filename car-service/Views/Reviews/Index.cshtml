@@ -1,0 +1,73 @@
+@model ReviewsPageViewModel
+@{ ViewData["Title"] = "Отзывы"; }
+<section class="page-head">
+    <div class="container">
+        <span class="eyebrow">Отзывы</span>
+        <h1>Отзывы клиентов</h1>
+        @if (Model.AverageRating > 0)
+        {
+            <p class="lead muted">Средняя оценка: <strong class="accent-text">@Model.AverageRating.ToString("0.0")</strong> из 5</p>
+        }
+    </div>
+</section>
+
+<section class="section">
+    <div class="container reviews-layout">
+        <div class="review-list">
+            @foreach (var r in Model.Reviews)
+            {
+                <partial name="_ReviewCard" model="r" />
+            }
+            @if (Model.Reviews.Count == 0)
+            {
+                <p class="muted">Пока нет опубликованных отзывов.</p>
+            }
+            @if (Model.TotalPages > 1)
+            {
+                <nav class="pager">
+                    @for (var p = 1; p <= Model.TotalPages; p++)
+                    {
+                        <a class="@(p == Model.Page ? "active" : "")" asp-action="Index" asp-route-page="@p">@p</a>
+                    }
+                </nav>
+            }
+        </div>
+
+        <aside class="card review-form-card" id="add">
+            <h3>Оставить отзыв</h3>
+            @if (!Model.IsAuthenticated)
+            {
+                <p class="muted">Отзывы могут оставлять клиенты после посещения сервиса. Войдите в личный кабинет.</p>
+                <a class="btn btn-accent btn-block" asp-controller="Account" asp-action="Login" asp-route-returnUrl="/Reviews#add">Войти</a>
+            }
+            else if (!Model.CanReview)
+            {
+                <p class="muted">Оставить отзыв можно после посещения сервиса — когда хотя бы одна ваша запись получит статус «Выполнена».</p>
+                <a class="btn btn-outline btn-block" asp-controller="Booking" asp-action="Index">Записаться</a>
+            }
+            else
+            {
+                <form method="post" asp-action="Create" class="stack">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-err"></div>
+                    <div class="field">
+                        <label>Оценка</label>
+                        <div class="rating-input">
+                            @for (var i = 5; i >= 1; i--)
+                            {
+                                <input type="radio" id="star@(i)" name="Rating" value="@i" checked="@(Model.Form.Rating == i)" />
+                                <label for="star@(i)" title="@i">@Icons.Svg("star", 22)</label>
+                            }
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="Text">Ваш отзыв</label>
+                        <textarea id="Text" name="Text" rows="5" required minlength="10" maxlength="2000">@Model.Form.Text</textarea>
+                        @Html.ValidationMessage("Text", new { @class = "field-error" })
+                    </div>
+                    <button class="btn btn-accent btn-block" type="submit">Отправить на модерацию</button>
+                    <p class="muted small">Отзыв появится на сайте после проверки администратором.</p>
+                </form>
+            }
+        </aside>
+    </div>
+</section>

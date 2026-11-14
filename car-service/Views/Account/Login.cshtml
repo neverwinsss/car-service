@@ -1,0 +1,24 @@
+@model LoginViewModel
+@{ ViewData["Title"] = "Вход"; }
+<section class="container page auth">
+    <div class="card auth-card">
+        <h1 class="h2">Вход в личный кабинет</h1>
+        <form method="post" class="stack">
+            <input type="hidden" asp-for="ReturnUrl" />
+            <div asp-validation-summary="ModelOnly" class="alert alert-err"></div>
+            <div class="field">
+                <label asp-for="Email"></label>
+                <input asp-for="Email" type="email" autocomplete="username" required autofocus />
+                <span asp-validation-for="Email" class="field-error"></span>
+            </div>
+            <div class="field">
+                <label asp-for="Password"></label>
+                <input asp-for="Password" autocomplete="current-password" required />
+                <span asp-validation-for="Password" class="field-error"></span>
+            </div>
+            <label class="check"><input asp-for="RememberMe" /> Запомнить меня</label>
+            <button type="submit" class="btn btn-accent btn-block">Войти</button>
+        </form>
+        <p class="muted center mt-2">Нет аккаунта? <a asp-action="Register">Зарегистрироваться</a></p>
+    </div>
+</section>

@@ -1,0 +1,63 @@
+@model SiteSettings
+@{ ViewData["Title"] = "Контакты и настройки"; }
+
+<form method="post" class="stack">
+    <div asp-validation-summary="All" class="alert alert-err"></div>
+
+    <div class="card stack">
+        <h2 class="h3">Кнопка «Позвонить»</h2>
+        <div class="form-grid">
+            <div class="field">
+                <label asp-for="CallPhone"></label>
+                <input asp-for="CallPhone" required placeholder="+79001234567" />
+                <span class="muted small">Номер, который набирается при нажатии на мобильном устройстве.</span>
+            </div>
+            <div class="field">
+                <label asp-for="CallButtonText"></label>
+                <input asp-for="CallButtonText" />
+            </div>
+        </div>
+        <label class="check"><input asp-for="CallButtonEnabled" /> Показывать кнопку «Позвонить» на сайте</label>
+        <label class="check"><input asp-for="CallButtonFloating" /> Плавающая круглая кнопка в углу экрана на мобильных</label>
+    </div>
+
+    <div class="card stack">
+        <h2 class="h3">Контактная информация</h2>
+        <div class="form-grid">
+            <div class="field"><label asp-for="CompanyName"></label><input asp-for="CompanyName" required /></div>
+            <div class="field"><label asp-for="Slogan"></label><input asp-for="Slogan" /></div>
+            <div class="field"><label asp-for="Phone"></label><input asp-for="Phone" required /></div>
+            <div class="field"><label asp-for="Email"></label><input asp-for="Email" type="email" /></div>
+            <div class="field span-2"><label asp-for="Address"></label><input asp-for="Address" required /></div>
+            <div class="field span-2"><label asp-for="WorkHoursText"></label><input asp-for="WorkHoursText" /></div>
+            <div class="field span-2">
+                <label asp-for="MapEmbedUrl"></label>
+                <input asp-for="MapEmbedUrl" />
+                <span asp-validation-for="MapEmbedUrl" class="field-error"></span>
+                <span class="muted small">Яндекс.Карты → «Поделиться» → «Виджет с картой» → скопируйте адрес из атрибута src.</span>
+            </div>
+            <div class="field"><label asp-for="VkUrl"></label><input asp-for="VkUrl" /><span asp-validation-for="VkUrl" class="field-error"></span></div>
+            <div class="field"><label asp-for="TelegramUrl"></label><input asp-for="TelegramUrl" /><span asp-validation-for="TelegramUrl" class="field-error"></span></div>
+            <div class="field"><label asp-for="WhatsappUrl"></label><input asp-for="WhatsappUrl" /><span asp-validation-for="WhatsappUrl" class="field-error"></span></div>
+        </div>
+    </div>
+
+    <div class="card stack">
+        <h2 class="h3">Тексты «О сервисе»</h2>
+        <div class="field"><label asp-for="AboutShort"></label><textarea asp-for="AboutShort" rows="3"></textarea></div>
+        <div class="field"><label asp-for="AboutFull"></label><textarea asp-for="AboutFull" rows="8"></textarea><span class="muted small">Каждый абзац — с новой строки.</span></div>
+        <div class="form-grid form-grid-3">
+            <div class="field"><label asp-for="YearsOnMarket"></label><input asp-for="YearsOnMarket" type="number" min="0" /></div>
+            <div class="field"><label asp-for="CarsServiced"></label><input asp-for="CarsServiced" type="number" min="0" /></div>
+            <div class="field"><label asp-for="WarrantyMonths"></label><input asp-for="WarrantyMonths" type="number" min="0" /></div>
+        </div>
+    </div>
+
+    <div class="card stack">
+        <h2 class="h3">Подвал сайта</h2>
+        <div class="field"><label asp-for="LegalInfo"></label><textarea asp-for="LegalInfo" rows="2"></textarea></div>
+        <div class="field"><label asp-for="DevelopersInfo"></label><textarea asp-for="DevelopersInfo" rows="2"></textarea></div>
+    </div>
+
+    <div><button class="btn btn-accent" type="submit">Сохранить настройки</button></div>
+</form>

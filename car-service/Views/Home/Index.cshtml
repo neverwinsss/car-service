@@ -1,0 +1,157 @@
+﻿@model HomeViewModel
+@inject SiteCache Cache
+@{
+    var s = await Cache.GetSettingsAsync();
+    ViewData["Description"] = s.AboutShort;
+}
+
+<!-- Баннер-слайдер -->
+<section class="hero" data-slider aria-roledescription="carousel">
+    <div class="hero-track">
+        @for (var i = 0; i < Model.Slides.Count; i++)
+        {
+            var sl = Model.Slides[i];
+            <div class="slide @(i == 0 ? "is-active" : "")" data-slide
+                 style="@(string.IsNullOrEmpty(sl.ImageUrl) ? "" : $"--slide-img:url('{sl.ImageUrl}')")">
+                <div class="container slide-content">
+                    @if (!string.IsNullOrEmpty(sl.Tag)) { <span class="tag">@sl.Tag</span> }
+                    @if (i == 0) { <h1>@sl.Title</h1> } else { <h2 class="h1">@sl.Title</h2> }
+                    @if (!string.IsNullOrEmpty(sl.Subtitle)) { <p class="lead">@sl.Subtitle</p> }
+                    <div class="hero-actions">
+                        @if (!string.IsNullOrEmpty(sl.ButtonText)) { <a class="btn btn-accent" href="@(sl.ButtonUrl ?? "#booking")">@sl.ButtonText</a> }
+                        @if (s.CallButtonEnabled) { <a class="btn btn-outline" href="@s.CallPhoneHref">@Icons.Svg("phone", 16) @s.CallButtonText</a> }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    @if (Model.Slides.Count > 1)
+    {
+        <div class="container hero-controls">
+            <button type="button" class="icon-btn" data-prev aria-label="Предыдущий слайд">@Icons.Svg("left")</button>
+            <div class="dots">
+                @for (var i = 0; i < Model.Slides.Count; i++)
+                {
+                    <button type="button" class="dot @(i == 0 ? "is-active" : "")" data-dot="@i" aria-label="Слайд @(i + 1)"></button>
+                }
+            </div>
+            <button type="button" class="icon-btn" data-next aria-label="Следующий слайд">@Icons.Svg("right")</button>
+        </div>
+    }
+</section>
+
+<!-- Преимущества -->
+<section class="container stats">
+    <div class="stat"><div class="stat-num">@s.YearsOnMarket+</div><div class="muted">лет работы</div></div>
+    <div class="stat"><div class="stat-num">@s.CarsServiced.ToString("N0")</div><div class="muted">автомобилей обслужено</div></div>
+    <div class="stat"><div class="stat-num">@s.WarrantyMonths мес.</div><div class="muted">гарантия на работы</div></div>
+    <div class="stat"><div class="stat-num">@s.SlotCapacity</div><div class="muted">поста одновременно</div></div>
+</section>
+
+<!-- О сервисе -->
+<section class="section">
+    <div class="container about-grid">
+        <div>
+            <span class="eyebrow">О сервисе</span>
+            <h2>Ремонт, которому можно доверять</h2>
+            <p class="lead muted">@s.AboutShort</p>
+            <a class="btn btn-outline" asp-controller="About" asp-action="Index">Подробнее о нас</a>
+        </div>
+        <ul class="features">
+            <li>@Icons.Svg("award", 22)<div><strong>Квалифицированные мастера</strong><span class="muted">Опыт от 7 лет, регулярное обучение и сертификация.</span></div></li>
+            <li>@Icons.Svg("shield", 22)<div><strong>Гарантия @s.WarrantyMonths месяцев</strong><span class="muted">На все виды работ и установленные запчасти.</span></div></li>
+            <li>@Icons.Svg("check", 22)<div><strong>Прозрачные цены</strong><span class="muted">Смета до начала работ, никаких скрытых доплат.</span></div></li>
+            <li>@Icons.Svg("clock", 22)<div><strong>Точно в срок</strong><span class="muted">Онлайн-запись без очередей и ожидания.</span></div></li>
+        </ul>
+    </div>
+</section>
+
+<!-- Услуги -->
+<section class="section section-alt">
+    <div class="container">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Услуги</span>
+                <h2>Основные услуги</h2>
+            </div>
+            <a class="link-more" asp-controller="Services" asp-action="Index">Все услуги и цены @Icons.Svg("right", 16)</a>
+        </div>
+        <div class="cards-3">
+            @foreach (var svc in Model.Services)
+            {
+                <article class="card service-card">
+                    <div class="service-icon">@Icons.Svg(svc.Icon, 24)</div>
+                    <h3>@svc.Title</h3>
+                    <p class="muted">@svc.ShortDescription</p>
+                    <div class="service-foot">
+                        <span class="price">от @svc.PriceFrom.ToString("N0") ₽</span>
+                        <a class="link-more" asp-controller="Booking" asp-action="Index" asp-route-serviceId="@svc.Id">Записаться</a>
+                    </div>
+                </article>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Отзывы -->
+<section class="section">
+    <div class="container">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Отзывы</span>
+                <h2>Что говорят клиенты</h2>
+            </div>
+            <a class="link-more" asp-controller="Reviews" asp-action="Index">Все отзывы @Icons.Svg("right", 16)</a>
+        </div>
+        <div class="cards-3">
+            @foreach (var r in Model.Reviews)
+            {
+                <partial name="_ReviewCard" model="r" />
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Запись -->
+<section class="section section-alt" id="booking">
+    <div class="container booking-wrap">
+        <div>
+            <span class="eyebrow">Онлайн-запись</span>
+            <h2>Запишитесь на удобное время</h2>
+            <p class="muted">Выберите услугу, дату и свободное время. Менеджер перезвонит для подтверждения записи.</p>
+            <p class="muted">Удобнее по телефону?</p>
+            @if (s.CallButtonEnabled)
+            {
+                <a class="btn btn-outline" href="@s.CallPhoneHref">@Icons.Svg("phone", 16) @s.Phone</a>
+            }
+        </div>
+        <div class="card">
+            <partial name="_BookingForm" model="Model.Booking" />
+        </div>
+    </div>
+</section>
+
+<!-- Контакты -->
+<section class="section">
+    <div class="container contacts-grid">
+        <div>
+            <span class="eyebrow">Контакты</span>
+            <h2>Как нас найти</h2>
+            <ul class="contact-list">
+                <li>@Icons.Svg("map")<span>@s.Address</span></li>
+                <li>@Icons.Svg("phone")<a href="@s.CallPhoneHref">@s.Phone</a></li>
+                @if (!string.IsNullOrEmpty(s.Email)) { <li>@Icons.Svg("mail")<a href="mailto:@s.Email">@s.Email</a></li> }
+                <li>@Icons.Svg("clock")<span>@s.WorkHoursText</span></li>
+            </ul>
+            @if (s.CallButtonEnabled)
+            {
+                <a class="btn btn-accent" href="@s.CallPhoneHref">@Icons.Svg("phone", 16) @s.CallButtonText</a>
+            }
+        </div>
+        <partial name="_Map" />
+    </div>
+</section>
+
+@section Scripts {
+    <script src="~/js/booking.js" asp-append-version="true" defer></script>
+}

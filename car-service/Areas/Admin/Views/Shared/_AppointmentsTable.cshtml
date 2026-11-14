@@ -1,0 +1,52 @@
+@model List<Appointment>
+@{
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
+}
+@if (Model.Count == 0)
+{
+    <p class="muted">Записей нет.</p>
+}
+else
+{
+    <div class="table-wrap">
+        <table class="table">
+            <thead>
+                <tr><th>№</th><th>Дата / время</th><th>Клиент</th><th>Услуга</th><th>Статус</th><th class="right">Действия</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var a in Model)
+                {
+                    <tr>
+                        <td data-label="№">@a.Id</td>
+                        <td data-label="Когда"><strong>@a.Date.ToString("dd.MM.yyyy")</strong> @a.Time.ToString("HH:mm")</td>
+                        <td data-label="Клиент">
+                            @a.ClientName<br />
+                            <a class="small" href="tel:@a.ClientPhone">@a.ClientPhone</a>
+                            @if (!string.IsNullOrEmpty(a.Car)) { <div class="muted small">@a.Car</div> }
+                            @if (!string.IsNullOrEmpty(a.Comment)) { <div class="muted small" title="@a.Comment">Комментарий: @(a.Comment.Length > 60 ? a.Comment[..60] + "…" : a.Comment)</div> }
+                        </td>
+                        <td data-label="Услуга">@a.Service?.Title</td>
+                        <td data-label="Статус"><span class="badge @Appointment.StatusCss(a.Status)">@Appointment.StatusTitle(a.Status)</span></td>
+                        <td class="right actions">
+                            @if (a.Status == AppointmentStatus.New)
+                            {
+                                <form method="post" asp-controller="Appointments" asp-action="SetStatus" asp-route-id="@a.Id">
+                                    <input type="hidden" name="status" value="Confirmed" /><input type="hidden" name="returnUrl" value="@returnUrl" />
+                                    <button class="btn btn-sm btn-accent" type="submit">Подтвердить</button>
+                                </form>
+                            }
+                            else if (a.Status == AppointmentStatus.Confirmed || a.Status == AppointmentStatus.InProgress)
+                            {
+                                <form method="post" asp-controller="Appointments" asp-action="SetStatus" asp-route-id="@a.Id">
+                                    <input type="hidden" name="status" value="Completed" /><input type="hidden" name="returnUrl" value="@returnUrl" />
+                                    <button class="btn btn-sm btn-outline" type="submit">Выполнена</button>
+                                </form>
+                            }
+                            <a class="btn btn-sm btn-ghost" asp-controller="Appointments" asp-action="Edit" asp-route-id="@a.Id">Открыть</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

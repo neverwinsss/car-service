@@ -1,0 +1,68 @@
+@model FeedbackViewModel
+@inject SiteCache Cache
+@{
+    var s = await Cache.GetSettingsAsync();
+    ViewData["Title"] = "Контакты";
+}
+<section class="page-head">
+    <div class="container">
+        <span class="eyebrow">Контакты</span>
+        <h1>Контакты</h1>
+        <p class="lead muted">Позвоните нам, напишите или приезжайте — будем рады помочь.</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container contacts-grid">
+        <div>
+            <ul class="contact-list">
+                <li>@Icons.Svg("map")<div><div class="muted small">Адрес</div>@s.Address</div></li>
+                <li>@Icons.Svg("phone")<div><div class="muted small">Телефон</div><a href="@s.CallPhoneHref">@s.Phone</a></div></li>
+                @if (!string.IsNullOrEmpty(s.Email))
+                {
+                    <li>@Icons.Svg("mail")<div><div class="muted small">E-mail</div><a href="mailto:@s.Email">@s.Email</a></div></li>
+                }
+                <li>@Icons.Svg("clock")<div><div class="muted small">Режим работы</div>@s.WorkHoursText</div></li>
+            </ul>
+            @if (s.CallButtonEnabled)
+            {
+                <a class="btn btn-accent btn-lg" href="@s.CallPhoneHref">@Icons.Svg("phone", 18) @s.CallButtonText</a>
+            }
+            <div class="socials mt-2">
+                @if (!string.IsNullOrEmpty(s.VkUrl)) { <a href="@s.VkUrl" target="_blank" rel="noopener" aria-label="ВКонтакте">@Icons.Svg("vk")</a> }
+                @if (!string.IsNullOrEmpty(s.TelegramUrl)) { <a href="@s.TelegramUrl" target="_blank" rel="noopener" aria-label="Telegram">@Icons.Svg("telegram")</a> }
+                @if (!string.IsNullOrEmpty(s.WhatsappUrl)) { <a href="@s.WhatsappUrl" target="_blank" rel="noopener" aria-label="Мессенджер">@Icons.Svg("whatsapp")</a> }
+            </div>
+        </div>
+        <partial name="_Map" />
+    </div>
+</section>
+
+<section class="section section-alt">
+    <div class="container narrow">
+        <h2>Обратная связь</h2>
+        <p class="muted">Задайте вопрос — менеджер ответит в течение рабочего дня.</p>
+        <form method="post" class="card">
+            <div class="form-grid">
+                <div class="field">
+                    <label asp-for="Name"></label>
+                    <input asp-for="Name" autocomplete="name" required />
+                    <span asp-validation-for="Name" class="field-error"></span>
+                </div>
+                <div class="field">
+                    <label asp-for="Contact"></label>
+                    <input asp-for="Contact" required />
+                    <span asp-validation-for="Contact" class="field-error"></span>
+                </div>
+                <div class="field span-2">
+                    <label asp-for="Message"></label>
+                    <textarea asp-for="Message" rows="5" required></textarea>
+                    <span asp-validation-for="Message" class="field-error"></span>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-accent" type="submit">@Icons.Svg("send", 16) Отправить</button>
+            </div>
+        </form>
+    </div>
+</section>

@@ -1,0 +1,12 @@
+﻿@model ErrorViewModel
+@{ ViewData["Title"] = "Ошибка"; }
+<section class="container page narrow center">
+    <div class="big-code">500</div>
+    <h1>Произошла ошибка</h1>
+    <p class="muted">При обработке запроса произошла ошибка. Попробуйте ещё раз позже.</p>
+    @if (Model?.ShowRequestId == true)
+    {
+        <p class="muted small">Код запроса: <code>@Model.RequestId</code></p>
+    }
+    <a class="btn btn-accent" asp-controller="Home" asp-action="Index">На главную</a>
+</section>

@@ -1,0 +1,69 @@
+@model Appointment
+@{
+    ViewData["Title"] = $"Заявка № {Model.Id}";
+    var services = (List<ServiceItem>)ViewBag.Services;
+}
+
+<div class="cards-2 align-start">
+    <div class="card">
+        <h2 class="h3">Клиент</h2>
+        <dl class="dl">
+            <dt>Имя</dt><dd>@Model.ClientName</dd>
+            <dt>Телефон</dt><dd><a href="tel:@Model.ClientPhone">@Model.ClientPhone</a></dd>
+            <dt>E-mail</dt><dd>@(Model.ClientEmail ?? "—")</dd>
+            <dt>Автомобиль</dt><dd>@(Model.Car ?? "—")</dd>
+            <dt>Аккаунт</dt><dd>@(Model.User != null ? $"{Model.User.FullName} ({Model.User.Email})" : "без регистрации")</dd>
+            <dt>Комментарий</dt><dd>@(Model.Comment ?? "—")</dd>
+            <dt>Создана</dt><dd>@AppTime.ToLocal(Model.CreatedAt).ToString("dd.MM.yyyy HH:mm")</dd>
+            @if (Model.UpdatedAt != null) { <dt>Изменена</dt><dd>@AppTime.ToLocal(Model.UpdatedAt.Value).ToString("dd.MM.yyyy HH:mm")</dd> }
+        </dl>
+    </div>
+
+    <form method="post" class="card stack">
+        <h2 class="h3">Обработка</h2>
+        <div class="field">
+            <label>Статус</label>
+            <select name="status">
+                @foreach (var st in Enum.GetValues<AppointmentStatus>())
+                {
+                    <option value="@st" selected="@(Model.Status == st)">@Appointment.StatusTitle(st)</option>
+                }
+            </select>
+        </div>
+        <div class="field">
+            <label>Услуга</label>
+            <select name="serviceId">
+                @foreach (var s in services)
+                {
+                    <option value="@s.Id" selected="@(Model.ServiceId == s.Id)">@s.Title@(s.IsActive ? "" : " (скрыта)")</option>
+                }
+            </select>
+        </div>
+        <div class="form-grid">
+            <div class="field">
+                <label>Дата</label>
+                <input type="date" name="date" value="@Model.Date.ToString("yyyy-MM-dd")" required />
+            </div>
+            <div class="field">
+                <label>Время</label>
+                <input type="time" name="time" value="@Model.Time.ToString("HH:mm")" required step="900" />
+            </div>
+        </div>
+        <div class="field">
+            <label>Заметка менеджера (видна только персоналу)</label>
+            <textarea name="managerNote" rows="3">@Model.ManagerNote</textarea>
+        </div>
+        <p class="muted small">При смене статуса или переносе клиент с аккаунтом получит уведомление в личном кабинете.</p>
+        <div class="row-between">
+            <button class="btn btn-accent" type="submit">Сохранить</button>
+            <a class="btn btn-ghost" asp-action="Index">Назад</a>
+        </div>
+    </form>
+</div>
+
+@if (User.IsInRole(Roles.Admin))
+{
+    <form method="post" asp-action="Delete" asp-route-id="@Model.Id" class="mt-2" onsubmit="return confirm('Удалить запись безвозвратно?')">
+        <button class="btn btn-sm btn-danger" type="submit">Удалить запись</button>
+    </form>
+}

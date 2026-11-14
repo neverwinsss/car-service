@@ -1,0 +1,45 @@
+@model Slide
+@{ ViewData["Title"] = Model.Id == 0 ? "Новый слайд" : "Редактирование слайда"; }
+
+<form method="post" class="card stack narrow-form">
+    <input type="hidden" asp-for="Id" />
+    <div class="field">
+        <label asp-for="Title"></label>
+        <input asp-for="Title" required />
+        <span asp-validation-for="Title" class="field-error"></span>
+    </div>
+    <div class="field">
+        <label asp-for="Subtitle"></label>
+        <textarea asp-for="Subtitle" rows="2"></textarea>
+    </div>
+    <div class="form-grid">
+        <div class="field">
+            <label asp-for="Tag"></label>
+            <input asp-for="Tag" />
+        </div>
+        <div class="field">
+            <label asp-for="SortOrder"></label>
+            <input asp-for="SortOrder" type="number" />
+        </div>
+        <div class="field">
+            <label asp-for="ButtonText"></label>
+            <input asp-for="ButtonText" />
+        </div>
+        <div class="field">
+            <label asp-for="ButtonUrl"></label>
+            <input asp-for="ButtonUrl" placeholder="/Booking" />
+            <span asp-validation-for="ButtonUrl" class="field-error"></span>
+        </div>
+    </div>
+    <div class="field">
+        <label asp-for="ImageUrl"></label>
+        <input asp-for="ImageUrl" placeholder="/img/slide1.jpg или https://..." />
+        <span asp-validation-for="ImageUrl" class="field-error"></span>
+        <span class="muted small">Изображение затемняется автоматически, чтобы текст оставался читаемым. Файлы можно положить в папку wwwroot/img.</span>
+    </div>
+    <label class="check"><input asp-for="IsActive" /> Показывать слайд</label>
+    <div class="row-between">
+        <button class="btn btn-accent" type="submit">Сохранить</button>
+        <a class="btn btn-ghost" asp-action="Index">Отмена</a>
+    </div>
+</form>

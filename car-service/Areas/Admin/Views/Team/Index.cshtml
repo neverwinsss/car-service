@@ -1,0 +1,26 @@
+@model List<TeamMember>
+@{ ViewData["Title"] = "Сотрудники"; }
+@section Actions { <a class="btn btn-accent" asp-action="Edit">+ Добавить</a> }
+
+<div class="card">
+    <div class="table-wrap">
+        <table class="table">
+            <thead><tr><th>#</th><th>Имя</th><th>Должность</th><th>Стаж</th><th class="right">Действия</th></tr></thead>
+            <tbody>
+                @foreach (var m in Model)
+                {
+                    <tr>
+                        <td data-label="#">@m.SortOrder</td>
+                        <td data-label="Имя"><strong>@m.Name</strong><div class="muted small">@m.Description</div></td>
+                        <td data-label="Должность">@m.Position</td>
+                        <td data-label="Стаж">@m.Experience лет</td>
+                        <td class="right actions">
+                            <a class="btn btn-sm btn-outline" asp-action="Edit" asp-route-id="@m.Id">Изменить</a>
+                            <form method="post" asp-action="Delete" asp-route-id="@m.Id" onsubmit="return confirm('Удалить?')"><button class="btn btn-sm btn-danger">Удалить</button></form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
